@@ -13,13 +13,15 @@ export function Team({ game, selected, onSelect }: Props) {
     <section className="team" aria-label="Team">
       {DEV_ORDER.map((id, i) => {
         const dev = DEVS[id];
+        const bonus = game.bonus[id] ?? 0;
         const out = game.out.includes(id);
         const ticket = game.tickets.find((t) => t.id === game.assignments[id]);
-        const status = out ? 'Out sick today' : ticket ? `${ticket.title} · +${outputOf(game, id)}` : 'Nothing to do';
+        const gone = game.gone.includes(id);
+        const status = gone ? game.outReason[id]! : out ? `${game.outReason[id] ?? 'Out'} today` : ticket ? `${ticket.title} · +${outputOf(game, id)}` : 'Nothing to do';
         return (
           <button
             key={id}
-            className={`dev ${id}${selected === id ? ' selected' : ''}${!out && !ticket ? ' free' : ''}`}
+            className={`dev ${id}${gone ? ' gone' : ''}${selected === id ? ' selected' : ''}${!out && !ticket ? ' free' : ''}`}
             disabled={out || game.phase !== 'planning'}
             aria-pressed={selected === id}
             onClick={() => onSelect(id)}
@@ -33,7 +35,7 @@ export function Team({ game, selected, onSelect }: Props) {
                 {dev.name} <small>{dev.role}</small>
               </span>
               <span className="dev-skill">
-                FE {dev.skill.fe} · BE {dev.skill.be}
+                FE {dev.skill.fe + bonus} · BE {dev.skill.be + bonus}
                 {dev.pairBonus > 0 && ` · +${dev.pairBonus} paired`}
               </span>
               <span className="dev-status">{status}</span>

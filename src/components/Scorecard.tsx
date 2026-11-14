@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { WEEKS, WEEK_NAMES } from '../engine/content';
 import { score } from '../engine/engine';
 import type { DayRecord, GameState } from '../engine/types';
 import { shareText } from '../share';
@@ -54,13 +55,17 @@ export function Scorecard({ game, onReplay, onNew }: Props) {
 
   return (
     <main className="scorecard">
+      <p className={`outcome ${card.won ? 'won' : 'lost'}`} role="status">
+        <span aria-hidden>{card.won ? '🚀' : '💥'}</span> {card.headline}
+      </p>
+
       <section className="verdict">
         <div className={`grade grade-${card.grade}`} aria-label={`Grade ${card.grade}`}>
           {card.grade}
         </div>
         <div>
           <p className="eyebrow">
-            Sprint “{game.seed}” · {card.score} pts
+            {card.won ? 'Launched' : 'Did not launch'} · “{game.seed}” · {card.score} pts
           </p>
           <h2>{card.title}</h2>
           <p className="dialog-body">{card.blurb}</p>
@@ -72,20 +77,29 @@ export function Scorecard({ game, onReplay, onNew }: Props) {
           <h3>
             What shipped <small>{card.shipped}/{card.total}</small>
           </h3>
-          <ul className="shipped-list">
-            {game.tickets
-              .filter((t) => t.dueDay === null)
-              .map((t) => (
-                <li key={t.id} className={t.shippedDay === null ? 'miss' : 'hit'}>
-                  <span aria-hidden>{t.shippedDay === null ? '○' : '●'}</span>
-                  <span>
-                    {t.title}
-                    {t.mustHave && <em> must-have</em>}
-                  </span>
-                  <span className="worth">{t.shippedDay === null ? `${t.progress}/${t.effort} pts` : `day ${t.shippedDay} · +${t.value}`}</span>
-                </li>
-              ))}
-          </ul>
+          {Array.from({ length: WEEKS }, (_, i) => i + 1).map((week) => {
+            const tickets = game.tickets.filter((t) => t.dueDay === null && t.week === week);
+            if (tickets.length === 0) return null;
+            return (
+              <div key={week}>
+                <h4 className="week-heading">
+                  Week {week} · {WEEK_NAMES[week - 1]}
+                </h4>
+                <ul className="shipped-list">
+                  {tickets.map((t) => (
+                    <li key={t.id} className={t.shippedDay === null ? (t.mustHave ? 'miss fatal' : 'miss') : 'hit'}>
+                      <span aria-hidden>{t.shippedDay === null ? (t.mustHave ? '✕' : '○') : '●'}</span>
+                      <span>
+                        {t.title}
+                        {t.mustHave && <em> must-have</em>}
+                      </span>
+                      <span className="worth">{t.shippedDay === null ? `${t.progress}/${t.effort} pts` : `day ${t.shippedDay} · +${t.value}`}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
         </div>
 
         <div className="panel">
@@ -116,10 +130,10 @@ export function Scorecard({ game, onReplay, onNew }: Props) {
           {copied === 'done' ? 'Copied ✓' : 'Copy result'}
         </button>
         <button className="ghost" onClick={onReplay}>
-          Replay this sprint
+          Replay this one
         </button>
         <button className="ghost" onClick={onNew}>
-          New random sprint
+          New random game
         </button>
       </div>
       {copied === 'failed' && (

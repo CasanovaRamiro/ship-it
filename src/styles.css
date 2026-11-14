@@ -101,10 +101,15 @@ small {
 
 .timeline {
   display: flex;
-  gap: 6px;
+  gap: 4px;
   list-style: none;
   margin: 0;
   padding: 0 0 14px;
+}
+
+/* A gap for the weekend. */
+.timeline .monday:not(:first-child) {
+  margin-left: 10px;
 }
 
 .timeline li {
@@ -114,11 +119,11 @@ small {
 .pip {
   display: grid;
   place-items: center;
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   border: 2px solid var(--line);
   border-radius: 50%;
-  font: 500 12px var(--mono);
+  font: 500 11px var(--mono);
   color: var(--muted);
   transition: all 0.25s;
 }
@@ -138,7 +143,7 @@ small {
 
 .flag {
   position: absolute;
-  top: 31px;
+  top: 27px;
   left: 50%;
   transform: translateX(-50%);
   font: 500 10px var(--mono);
@@ -549,6 +554,46 @@ kbd {
   color: var(--accent);
 }
 
+.dev.gone {
+  opacity: 0.45;
+  text-decoration: line-through;
+}
+
+.risks {
+  list-style: none;
+  margin: 0;
+  padding: 8px 10px;
+  display: grid;
+  gap: 4px;
+  font-size: 13px;
+  border: 2px dashed var(--bad);
+  border-radius: 8px;
+  color: var(--bad);
+}
+
+.risks b {
+  white-space: nowrap;
+}
+
+.week-banner {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin: 0;
+  font: 500 11px var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.week-banner strong {
+  font: 800 18px var(--display);
+  letter-spacing: -0.01em;
+  text-transform: none;
+  color: var(--ink);
+}
+
 .log {
   list-style: none;
   margin: 0;
@@ -713,6 +758,44 @@ kbd {
 .grade-D {
   background: var(--surface);
   color: var(--ink);
+}
+
+.grade-F {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+.outcome {
+  margin: 0;
+  padding: 14px 18px;
+  border: 3px solid var(--ink);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  font: 800 22px/1.2 var(--display);
+  letter-spacing: -0.01em;
+}
+
+.outcome.won {
+  background: var(--good);
+  color: var(--bg);
+}
+
+.outcome.lost {
+  background: var(--bad);
+  color: var(--bg);
+}
+
+.week-heading {
+  margin: 12px 0 6px;
+  font: 500 11px var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.shipped-list .fatal,
+.shipped-list .fatal em {
+  color: var(--bad);
 }
 
 .results {
@@ -904,6 +987,26 @@ kbd {
 
   .log {
     display: none;
+  }
+
+  .timeline {
+    gap: 3px;
+  }
+
+  .timeline .monday:not(:first-child) {
+    margin-left: 6px;
+  }
+
+  .pip {
+    width: 18px;
+    height: 18px;
+    border-width: 1.5px;
+    font-size: 9px;
+  }
+
+  .flag {
+    top: 21px;
+    font-size: 8px;
   }
 
   .meters {

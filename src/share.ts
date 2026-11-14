@@ -10,8 +10,8 @@ export function shareText(state: GameState): string {
     .map((t) => (t.shippedDay === null ? '⬜' : '✅'))
     .join('');
   return [
-    `📦 Ship It! · sprint “${state.seed}”`,
-    `Grade ${card.grade} · ${card.score} pts · ${card.title}`,
+    `📦 Ship It! · “${state.seed}”`,
+    `${card.won ? '🚀 Launched' : '💥 Did not launch'} · grade ${card.grade} · ${card.score} pts · ${card.title}`,
     `${boxes} ${card.shipped}/${card.total} shipped`,
     `morale ${card.morale} · trust ${card.trust}`,
     seedUrl(state.seed),

@@ -5,8 +5,8 @@ import { Intro } from './components/Intro';
 import { Scorecard } from './components/Scorecard';
 import { Team } from './components/Team';
 import { TicketCard } from './components/TicketCard';
-import { DAYS, DEVS, DEV_ORDER } from './engine/content';
-import { assign, choose, createGame, eventView, runDay, setCrunch } from './engine/engine';
+import { DAYS, DEVS, DEV_ORDER, WEEK_NAMES, weekOf } from './engine/content';
+import { assign, choose, createGame, eventView, risks, runDay, setCrunch } from './engine/engine';
 import type { DevId, GameState } from './engine/types';
 import { randomSeed, readSeed, writeSeed } from './seed';
 
@@ -54,13 +54,23 @@ export function App() {
 
   const idle = DEV_ORDER.filter((d) => !game.out.includes(d) && game.assignments[d] === null);
   const event = started ? eventView(game) : null;
+  const week = weekOf(game.day);
+  // Keep the board to what matters now: open work, plus what shipped this week.
+  const visible = game.tickets.filter((t) => t.shippedDay === null || weekOf(t.shippedDay) === week);
+  const shippedEarlier = game.tickets.length - visible.length;
 
   return (
     <div className="page">
       <Header game={game} />
       <main className="board">
         <section className="tickets" aria-label="Backlog">
-          {game.tickets.map((ticket) => (
+          <p className="week-banner">
+            <strong>
+              Week {week} · {WEEK_NAMES[week - 1]}
+            </strong>
+            {shippedEarlier > 0 && <span>{shippedEarlier} shipped in earlier weeks</span>}
+          </p>
+          {visible.map((ticket) => (
             <TicketCard
               key={ticket.id}
               game={game}
@@ -80,7 +90,7 @@ export function App() {
               <input type="checkbox" checked={game.crunch} disabled={!planning} onChange={(e) => setGame(setCrunch(game, e.target.checked))} />
               <span>
                 <strong>Crunch today</strong>
-                <small>Everyone +1 pt · morale −15</small>
+                <small>Everyone +1 pt · morale −18</small>
               </span>
             </label>
             <button className="run" disabled={!planning} onClick={() => update(runDay(game))}>
@@ -89,6 +99,15 @@ export function App() {
             <p className="idle" role="status">
               {idle.length > 0 && planning ? `${idle.map((d) => DEVS[d].name).join(' and ')} ${idle.length > 1 ? 'have' : 'has'} nothing to do.` : ' '}
             </p>
+            {risks(game).length > 0 && (
+              <ul className="risks" aria-label="Risks in today’s plan">
+                {risks(game).map((risk) => (
+                  <li key={risk.text}>
+                    <span aria-hidden>⚠</span> {risk.text} <b>{Math.round(risk.chance * 100)}% it goes wrong.</b>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
           <ol className="log" aria-label="Sprint log">
@@ -103,7 +122,7 @@ export function App() {
       </main>
 
       {!started && <Intro seed={game.seed} onStart={() => setStarted(true)} />}
-      {event && <EventDialog key={game.day} day={game.day} event={event} onChoose={(i) => update(choose(game, i))} />}
+      {event && <EventDialog key={`${game.day}-${game.pendingEvent?.id}`} day={game.day} event={event} onChoose={(i) => update(choose(game, i))} />}
     </div>
   );
 }
