@@ -18,6 +18,8 @@ export interface Ticket {
   kind: Skill;
   effort: number;
   progress: number;
+  /** The week this ticket landed on the board. */
+  week: number;
   /** Business value, counted only once the ticket ships. */
   value: number;
   mustHave: boolean;
@@ -28,20 +30,16 @@ export interface Ticket {
 
 export type Phase = 'planning' | 'event' | 'over';
 
-export type EventId =
-  | 'scope-creep'
-  | 'incident'
-  | 'sick'
-  | 'underestimated'
-  | 'lunch'
-  | 'status-call'
-  | 'demo';
+/** A key of EVENTS in events.ts. */
+export type EventId = string;
 
 /** An event waiting on the player, with whatever it rolled when it fired. */
 export interface PendingEvent {
   id: EventId;
   devId?: DevId;
   ticketId?: string;
+  /** Which flavour of the story to tell, for events with several. */
+  variant?: number;
 }
 
 export type Tone = 'good' | 'bad' | 'info';
@@ -76,21 +74,37 @@ export interface GameState {
   /** Devs who are out today / tomorrow. */
   out: DevId[];
   outTomorrow: DevId[];
-  /** Everyone works one point slower today / tomorrow. */
-  slow: boolean;
-  slowTomorrow: boolean;
+  /** Devs who quit. They don't come back. */
+  gone: DevId[];
+  /** Why each dev was last out, for the team panel. */
+  outReason: Partial<Record<DevId, string>>;
+  /** Points everyone gains or loses per day, today / tomorrow. */
+  pace: number;
+  paceTomorrow: number;
+  /** Permanent extra points per day a dev has earned. */
+  bonus: Partial<Record<DevId, number>>;
   /** Which event fires after which day. */
   schedule: Partial<Record<number, EventId>>;
+  /** Accidents that can happen in this game when the plan invites them. */
+  hazards: EventId[];
   pendingEvent: PendingEvent | null;
+  /** Events still to resolve tonight, after the pending one. */
+  queue: EventId[];
+  /** Unused events, drawn on when a scheduled one can't happen. */
+  spare: EventId[];
   /** Times the player declined or traded scope. */
   saidNo: number;
   log: LogEntry[];
   history: DayRecord[];
 }
 
-export type Grade = 'S' | 'A' | 'B' | 'C' | 'D';
+export type Grade = 'S' | 'A' | 'B' | 'C' | 'D' | 'F';
 
 export interface Scorecard {
+  /** Launched: every must-have shipped and nobody walked away. */
+  won: boolean;
+  /** One line that says, unmistakably, how it ended. */
+  headline: string;
   score: number;
   grade: Grade;
   title: string;
