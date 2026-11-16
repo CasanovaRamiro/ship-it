@@ -1,4 +1,4 @@
-import { DAYS, DEMO_DAY, LOW_MORALE } from '../engine/content';
+import { DAYS, DAYS_PER_WEEK, LOW_MORALE, LOW_TRUST, isFriday, weekOf } from '../engine/content';
 import { valueShipped } from '../engine/engine';
 import type { GameState } from '../engine/types';
 
@@ -22,13 +22,13 @@ export function Header({ game }: { game: GameState }) {
         <span aria-hidden>📦</span> Ship It!
       </h1>
 
-      <ol className="timeline" aria-label={over ? 'Sprint finished' : `Day ${game.day} of ${DAYS}`}>
+      <ol className="timeline" aria-label={over ? 'Game over' : `Day ${game.day} of ${DAYS}, week ${weekOf(game.day)}`}>
         {Array.from({ length: DAYS }, (_, i) => i + 1).map((day) => {
-          const state = over || day < game.day ? 'past' : day === game.day ? 'now' : 'future';
+          const state = day < game.day || (over && day === game.day) ? 'past' : day === game.day ? 'now' : 'future';
           return (
-            <li key={day} className={state}>
+            <li key={day} className={`${state}${day % DAYS_PER_WEEK === 1 ? ' monday' : ''}`}>
               <span className="pip">{day}</span>
-              {day === DEMO_DAY && <span className="flag">demo</span>}
+              {isFriday(day) && <span className="flag">{day === DAYS ? 'launch' : 'review'}</span>}
             </li>
           );
         })}
@@ -36,7 +36,7 @@ export function Header({ game }: { game: GameState }) {
 
       <div className="meters">
         <Meter label="Morale" value={game.morale} warn={game.morale < LOW_MORALE} />
-        <Meter label="Trust" value={game.trust} warn={game.trust < 35} />
+        <Meter label="Trust" value={game.trust} warn={game.trust < LOW_TRUST} />
         <div className="value">
           <span className="meter-label">Value shipped</span>
           <strong>{valueShipped(game)}</strong>
